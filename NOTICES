@@ -1,0 +1,28 @@
+# Notices
+
+## TarkovIRL — Weapons Handling Mod
+
+This project (TarkovRL) is a derivative work based on TarkovIRL, originally
+created by **adishee**.
+
+- Original project: https://github.com/crm85/TarkovIRL-public
+- Original mod page: https://forge.sp-tarkov.com/mod/1459/tarkovirl-weapons-handling-mod
+- Author: adishee (https://github.com/crm85)
+
+The weapon deadzone system and several weapon handling concepts in this
+project were ported from TarkovIRL's source code. Full credit for the
+original implementation goes to adishee.
+
+## SPT — Single Player Tarkov
+
+This mod targets SPT (Single Player Tarkov) and would not be possible
+without the SPT team's work.
+
+- Project: https://www.sp-tarkov.com/
+
+## BepInEx / HarmonyX
+
+This mod uses BepInEx and HarmonyX for plugin loading and runtime patching.
+
+- BepInEx: https://github.com/BepInEx/BepInEx
+- HarmonyX: https://github.com/BepInEx/HarmonyX

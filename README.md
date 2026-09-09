@@ -2,6 +2,9 @@
 
 A BepInEx plugin for **SPT 4.1.x** (Single Player Tarkov) that adds realistic weapon handling: procedural sway, aim/hip deadzones, weapon inertia, momentum, camera lag, turn lean, shot misalignment, reload efficiency, and leg cripple effects.
 
+> **Inspired by and based on [TarkovIRL](https://github.com/crm85/TarkovIRL-public) by adishee.**
+> The weapon deadzone system and several handling concepts were ported from TarkovIRL's Weapons Handling Mod. Full credit to adishee for the original work. This is a derivative port tuned for SPT 4.1.x with personal config defaults.
+
 ## What it does
 
 TarkovRL overhauls weapon handling to feel more realistic and weighty. It replaces the vanilla rigid weapon pose with procedural motion driven by weapon weight, ergonomics, stamina, and player movement.
@@ -62,6 +65,12 @@ Name:    Tarkov Real Life
 Version: 1.0.0
 ```
 
+## Credits
+
+- **adishee** ([github.com/crm85](https://github.com/crm85/TarkovIRL-public)) — Original author of [TarkovIRL - Weapons Handling Mod](https://forge.sp-tarkov.com/mod/1459/tarkovirl-weapons-handling-mod). The weapon deadzone system and several handling concepts in this mod were ported from TarkovIRL. Full credit for the original implementation goes to adishee.
+- **SPT Team** — Single Player Tarkov, without which none of this would be possible.
+- **BepInEx / HarmonyX** — The plugin and patching frameworks this mod builds on.
+
 ## License
 
-MIT — see LICENSE file if present. Otherwise, free to use and modify.
+MIT — see [LICENSE](LICENSE). The original TarkovIRL code ported into this project retains its attribution to adishee.
