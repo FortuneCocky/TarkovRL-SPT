@@ -1,0 +1,20 @@
+## Build output
+bin/
+obj/
+
+## Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+
+## OS files
+Thumbs.db
+.DS_Store
+
+## Release zip (tracked separately in release/)
+release/TarkovRL-*.zip
+
+## Allow release DLL
+*.dll
+!release/**/*.dll
