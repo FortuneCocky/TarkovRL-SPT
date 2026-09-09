@@ -30,6 +30,8 @@ internal static class HandlingConfig
 
 	public static ConfigEntry<bool> SprintCancelAds { get; private set; }
 
+	public static ConfigEntry<float> FreeLookReturnSpeed { get; private set; }
+
 	public static ConfigEntry<bool> AimingEnabled { get; private set; }
 
 	public static ConfigEntry<float> LightWeightKg { get; private set; }
@@ -180,6 +182,7 @@ internal static class HandlingConfig
 		Enabled = config.Bind("1. General", "Enable mod", defaultValue: true, "Master switch. When off, all handling systems leave the vanilla values untouched.");
 		VerboseLogging = config.Bind("1. General", "Verbose logging", defaultValue: true, "Log recalculated weapon handling values to the BepInEx console.");
 		SprintCancelAds = config.Bind("1. General", "Cancel sprint to ADS on right click", defaultValue: true, "Pressing right mouse while sprinting cancels sprint and immediately aims down sights.");
+		FreeLookReturnSpeed = config.Bind("1. General", "Free look return speed", 12f, new ConfigDescription("How fast the camera smoothly returns to forward view after exiting free look. Higher = snappier, lower = smoother. 0 = instant snap.", new AcceptableValueRange<float>(0f, 30f)));
 		AimingEnabled = config.Bind("2. Aiming", "Enable aiming changes", defaultValue: true, "Scale ADS speed by weapon weight, ergonomics and hands stamina.");
 		LightWeightKg = config.Bind("2. Aiming", "Light weapon weight (kg)", 2f, new ConfigDescription("Weight treated as a light weapon.", new AcceptableValueRange<float>(0.5f, 8f)));
 		HeavyWeightKg = config.Bind("2. Aiming", "Heavy weapon weight (kg)", 10f, new ConfigDescription("Weight treated as a heavy weapon.", new AcceptableValueRange<float>(3f, 20f)));

@@ -35,6 +35,14 @@ internal class Patch_SetHeadRotation : ModulePatch
 			return;
 		}
 
+		// Skip deadzone/camera modifications during free-look return smoothing.
+		// HandlingManager.Tick() sets HandlingState.HeadRotation directly
+		// during the smoothing transition.
+		if (HandlingManager.IsFreeLookReturnActive)
+		{
+			return;
+		}
+
 		// Apply weapon deadzone (Tarkov Real Life cone-clamp) first.
 		// This is a direct camera clamp that works in all states.
 		headRot = WeaponDeadzoneSystem.Modify(headRot);

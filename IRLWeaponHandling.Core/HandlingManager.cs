@@ -18,10 +18,23 @@ internal static class HandlingManager
     // Track free-look state to detect the transition out of free look
     private static bool _wasFreeLooking;
 
+    // Free-look return smoothing state — smoothly interpolates the camera
+    // from the free-look end position back to the forward view instead of
+    // snapping instantly.
+    private static bool _freeLookReturnActive;
+    private static Vector3 _freeLookReturnStart;
+    private static Vector3 _freeLookReturnTarget;
+    private static float _freeLookReturnT;
+
     // Track the current firearm instance so we can detect weapon swaps
     // and reset procedural state — prevents the weapon from being
     // misplaced when switching weapons mid-sprint.
     private static object _lastFirearm;
+
+    // Whether the free-look return smoothing is currently active.
+    // Patch_SetHeadRotation checks this to skip deadzone modifications
+    // during the smoothing transition.
+    public static bool IsFreeLookReturnActive => _freeLookReturnActive;
 
     public static void Tick(Player player, float dt)
     {
@@ -41,21 +54,64 @@ internal static class HandlingManager
             return;
         }
 
-        // Just exited free look — force the camera back to the player's
-        // forward rotation so the deadzone re-initializes from center,
-        // not from the free-look offset position.
+        // Just exited free look — start smoothing the camera back to the
+        // forward rotation instead of snapping instantly.
         if (_wasFreeLooking)
         {
             _wasFreeLooking = false;
             ResetAll(player);
-            // Snap the procedural weapon animation's head rotation to the
-            // player's actual forward rotation so there's no residual offset.
+
+            // Capture the current camera rotation as the smoothing start point,
+            // and the player's forward rotation as the target.
             Vector3 forwardRot = player.Rotation;
+            _freeLookReturnStart = HandlingState.HeadRotation;
+            _freeLookReturnTarget = forwardRot;
+            _freeLookReturnT = 0f;
+
+            float returnSpeed = HandlingConfig.FreeLookReturnSpeed?.Value ?? 12f;
+            if (returnSpeed <= 0f)
+            {
+                // Instant snap — no smoothing
+                if (player.ProceduralWeaponAnimation != null)
+                {
+                    player.ProceduralWeaponAnimation.SetHeadRotation(forwardRot);
+                }
+                HandlingState.HeadRotation = forwardRot;
+            }
+            else
+            {
+                _freeLookReturnActive = true;
+            }
+        }
+
+        // If free-look return smoothing is active, interpolate the camera
+        // towards the forward rotation and bypass normal deadzone processing.
+        if (_freeLookReturnActive)
+        {
+            float returnSpeed = HandlingConfig.FreeLookReturnSpeed?.Value ?? 12f;
+            _freeLookReturnT = Mathf.Clamp01(_freeLookReturnT + Time.deltaTime * returnSpeed);
+
+            Vector3 smoothed = new Vector3(
+                Mathf.LerpAngle(_freeLookReturnStart.x, _freeLookReturnTarget.x, _freeLookReturnT),
+                Mathf.LerpAngle(_freeLookReturnStart.y, _freeLookReturnTarget.y, _freeLookReturnT),
+                Mathf.LerpAngle(_freeLookReturnStart.z, _freeLookReturnTarget.z, _freeLookReturnT)
+            );
+
+            HandlingState.HeadRotation = smoothed;
             if (player.ProceduralWeaponAnimation != null)
             {
-                player.ProceduralWeaponAnimation.SetHeadRotation(forwardRot);
+                player.ProceduralWeaponAnimation.SetHeadRotation(smoothed);
             }
-            HandlingState.HeadRotation = forwardRot;
+
+            if (_freeLookReturnT >= 1f)
+            {
+                _freeLookReturnActive = false;
+                // Deadzone systems were reset when free look ended and haven't
+                // been modified during smoothing. They will re-initialize from
+                // the current rotation on the next frame's normal processing.
+                HandlingState.HeadRotation = _freeLookReturnTarget;
+            }
+            return;
         }
         // Reset all procedural state when inventory/looting is open so the
         // weapon position doesn't get corrupted by stale offsets.
@@ -140,6 +196,7 @@ internal static class HandlingManager
     {
         _wasActive = false;
         _wasFreeLooking = false;
+        _freeLookReturnActive = false;
         _lastFirearm = null;
         DeadzoneSystem.Reset();
         WeaponDeadzoneSystem.Reset();
