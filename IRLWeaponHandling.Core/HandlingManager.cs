@@ -103,6 +103,7 @@ internal static class HandlingManager
                 _lastFirearm = currentFirearm;
                 ProceduralHipSystem.Reset();
                 DeadzoneSystem.Reset();
+                WeaponDeadzoneSystem.Reset();
                 SwaySystem.Reset();
                 CameraLagSystem.Reset(player.ProceduralWeaponAnimation);
             }

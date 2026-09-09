@@ -17,6 +17,11 @@ internal static class WeaponDeadzoneSystem
     private static Quaternion _current = Quaternion.identity;
     private static bool _initialized;
 
+    // Sprint blend: 0 = full deadzone, 1 = full sprint (no deadzone).
+    // Smoothly transitions so the camera doesn't snap when entering/leaving sprint.
+    private static float _sprintBlend;
+    private static float _sprintVelocity;
+
     /// <summary>
     /// Apply the weapon deadzone cone-clamp to the raw head rotation.
     /// Returns the clamped rotation, or the input if inactive.
@@ -24,6 +29,25 @@ internal static class WeaponDeadzoneSystem
     public static Vector3 Modify(Vector3 headRot)
     {
         if (!HandlingConfig.WeaponDeadzoneEnabled.Value || !HandlingState.HasWeapon)
+        {
+            _initialized = false;
+            _sprintBlend = 0f;
+            _sprintVelocity = 0f;
+            return headRot;
+        }
+
+        // Smoothly blend sprint state so the deadzone fades out during sprint
+        // and re-engages smoothly when sprint ends. This prevents the camera
+        // from snapping to a stale _current position after sprinting.
+        float sprintTarget = HandlingState.IsSprinting ? 1f : 0f;
+        float dt = Mathf.Min(Time.unscaledDeltaTime, 0.05f);
+        SpringSprint(ref _sprintBlend, ref _sprintVelocity, sprintTarget,
+            HandlingConfig.SprintTransitionSpeed.Value, dt);
+
+        // During full sprint, don't clamp — let vanilla handle the camera.
+        // Also reset _initialized so when sprint ends, the cone re-initializes
+        // to the current head rotation instead of using a stale _current.
+        if (_sprintBlend > 0.95f)
         {
             _initialized = false;
             return headRot;
@@ -39,7 +63,6 @@ internal static class WeaponDeadzoneSystem
 
         float deadzone = Mathf.Max(0.001f, HandlingConfig.WeaponDeadzoneMulti.Value * 10f);
         float speed = HandlingConfig.WeaponDeadzoneFollowSpeed.Value;
-        float dt = Mathf.Min(Time.unscaledDeltaTime, 0.05f);
         float angle = Quaternion.Angle(_current, desired);
 
         if (angle > deadzone)
@@ -63,7 +86,14 @@ internal static class WeaponDeadzoneSystem
             }
         }
 
-        return _current.eulerAngles;
+        // Blend between the clamped camera and the raw head rotation based on
+        // sprint blend. Only blend yaw and pitch — never roll — to prevent
+        // the camera from rolling during the sprint transition.
+        Vector3 clamped = _current.eulerAngles;
+        Vector3 result = headRot;
+        result.x = Mathf.LerpAngle(clamped.x, headRot.x, _sprintBlend);
+        result.y = Mathf.LerpAngle(clamped.y, headRot.y, _sprintBlend);
+        return result;
     }
 
     /// <summary>
@@ -74,5 +104,16 @@ internal static class WeaponDeadzoneSystem
     {
         _current = Quaternion.identity;
         _initialized = false;
+        _sprintBlend = 0f;
+        _sprintVelocity = 0f;
+    }
+
+    private static void SpringSprint(ref float current, ref float velocity, float target, float freq, float dt)
+    {
+        float k = freq * freq;
+        float d = 1.4f * freq;
+        velocity += ((target - current) * k - velocity * d) * dt;
+        current += velocity * dt;
+        current = Mathf.Clamp01(current);
     }
 }
