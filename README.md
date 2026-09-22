@@ -22,8 +22,7 @@ TarkovRL overhauls weapon handling to feel more realistic and weighty. It replac
 | **Turn Lean** | Turning with the mouse leans the body into the turn. Camera and weapon bank instead of rotating level. |
 | **Procedural Q/E Lean** | Adds extra camera and weapon roll when leaning with Q/E for a more pronounced body-lean feel. |
 | **Momentum** | Weight and inertia-driven camera/weapon sway. Includes turn momentum, stop delay, and walk forward/side lean. |
-| **Reload Efficiency** | Reload speed scales with ergonomics. Sprint reload penalty configurable. |
-| **Leg Cripple** | Forces crouch/crawl when leg health drops below a threshold. Applies to player and/or bots. |
+| **Reload Efficiency** | Reload speed scales with ergonomics. Sprint reload penalty configurable. | | Forces crouch/crawl when leg health drops below a threshold. Applies to player and/or bots. |
 | **Sprint Cancel** | Right-click while sprinting cancels sprint and immediately aims down sights. |
 
 ### Key features
